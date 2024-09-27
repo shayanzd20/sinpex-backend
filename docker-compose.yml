@@ -1,0 +1,41 @@
+version: '3.8'
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: kanban-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: password  # Change this to your preferred password
+      MYSQL_DATABASE: kanban         # Your database name
+      MYSQL_USER: user               # Your preferred user
+      MYSQL_PASSWORD: userpassword   # User's password
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+    networks:
+      - kanban-net
+
+  # app:
+  #   build: .
+  #   container_name: kanban-app
+  #   environment:
+  #     DB_HOST: mysql
+  #     DB_NAME: kanban
+  #     DB_USER: user
+  #     DB_PASS: userpassword
+  #   depends_on:
+  #     - mysql
+  #   networks:
+  #     - kanban-net
+  #   ports:
+  #     - "5000:5000"
+  #   command: npm run dev # Or your Node.js startup command (npm start, node index.js, etc.)
+  #   volumes:
+  #     - .:/usr/src/app
+
+networks:
+  kanban-net:
+
+volumes:
+  mysql-data:

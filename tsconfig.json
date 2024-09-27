@@ -13,6 +13,9 @@
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
+    "experimentalDecorators": true,  // Enable experimental decorators
+    "emitDecoratorMetadata": true,    // Emit metadata for decorators (needed for reflect-metadata)
+    "strictPropertyInitialization": false,
     "types": ["vitest/globals"]
   },
   "include": ["src/**/*"],

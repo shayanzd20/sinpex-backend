@@ -1,15 +1,15 @@
+import 'reflect-metadata';
 import cors from "cors";
 import express, { type Express } from "express";
 import helmet from "helmet";
+import { Sequelize } from 'sequelize-typescript';
 import { pino } from "pino";
+import dotenv from "dotenv";
+dotenv.config(); 
 
 import { openAPIRouter } from "@/api-docs/openAPIRouter";
-import { healthCheckRouter } from "@/api/healthCheck/healthCheckRouter";
-import { userRouter } from "@/api/user/userRouter";
-import errorHandler from "@/common/middleware/errorHandler";
-import rateLimiter from "@/common/middleware/rateLimiter";
-import requestLogger from "@/common/middleware/requestLogger";
-import { env } from "@/common/utils/envConfig";
+import models from "./api/project/models";
+import projectRoutes from "./api/project/projectRoutes";
 
 const logger = pino({ name: "server start" });
 const app: Express = express();
@@ -20,21 +20,37 @@ app.set("trust proxy", true);
 // Middlewares
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(cors({ origin: env.CORS_ORIGIN, credentials: true }));
+app.use(cors({ 
+    // origin: process.env.CORS_ORIGIN, // just commented for test
+    credentials: true }));
 app.use(helmet());
-app.use(rateLimiter);
+// app.use(rateLimiter);
+
+// MySQL connection using Sequelize
+const sequelize = new Sequelize({
+    database: process.env.DB_NAME || 'kanban',
+    username: process.env.DB_USER || 'root',
+    password: process.env.DB_PASS || 'password',
+    host: process.env.DB_HOST || 'localhost',
+    dialect: 'mysql',
+    models: models
+});
+
+sequelize.authenticate()
+    .then(() => console.log('MySQL Connected'))
+    .catch(err => console.error('Connection error: ', err));
 
 // Request logging
-app.use(requestLogger);
+// app.use(requestLogger);
 
 // Routes
-app.use("/health-check", healthCheckRouter);
-app.use("/users", userRouter);
+
+// for versioning
+app.use('/api/v1/project', projectRoutes);
 
 // Swagger UI
 app.use(openAPIRouter);
 
 // Error handlers
-app.use(errorHandler());
+export { app, logger, sequelize };
 
-export { app, logger };
